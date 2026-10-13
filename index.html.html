@@ -1,0 +1,506 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Road Map JPJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<style>
+  /* Layout: hero with falling-code canvas, then a vertical timeline; center spine on desktop (cards alternate), left rail on phone. Single dark look by design. */
+  :root {
+    --bg: #05070d;
+    --surface: #0a1020;
+    --line: #1a2440;
+    --fg: #e6edf7;
+    --muted: #8a98b5;
+    --cyan: #22d3ee;
+    --violet: #a78bfa;
+    --matrix: #4ade80;
+    --magenta: #e879f9;
+    --mint: #5eead4;
+    --font-display: 'Chakra Petch', 'Trebuchet MS', sans-serif;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .font-display { font-family: var(--font-display); }
+  .font-mono { font-family: var(--font-mono); }
+  .gutter { padding-inline: 16px; }
+  @media (min-width: 640px) { .gutter { padding-inline: 32px; } }
+  .hero-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    background: linear-gradient(100deg, #f1f5ff 0%, var(--cyan) 45%, var(--violet) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 7%, var(--surface)) 0%, var(--surface) 60%);
+    border: 1px solid color-mix(in srgb, var(--c) 30%, var(--line));
+    border-radius: 6px;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover, .card.is-active {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--c) 70%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent), 0 12px 40px -12px color-mix(in srgb, var(--c) 55%, transparent);
+  }
+  .node {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--bg);
+    color: var(--c);
+    border: 1.5px solid color-mix(in srgb, var(--c) 60%, transparent);
+    transition: box-shadow .3s ease, background .3s ease;
+  }
+  .node.is-active {
+    background: color-mix(in srgb, var(--c) 16%, var(--bg));
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 14%, transparent), 0 0 28px color-mix(in srgb, var(--c) 60%, transparent);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1;
+    padding: 6px 9px;
+    border-radius: 3px;
+    color: color-mix(in srgb, var(--c) 85%, white);
+    background: color-mix(in srgb, var(--c) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+    transition: background .2s ease, transform .2s ease;
+  }
+  .chip:hover { background: color-mix(in srgb, var(--c) 22%, transparent); transform: translateY(-1px); }
+  .group-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--c);
+  }
+  .nav-chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+    padding: 9px 12px;
+    border-radius: 4px;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--c) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    transition: background .2s ease, box-shadow .2s ease;
+  }
+  .nav-chip:hover { background: color-mix(in srgb, var(--c) 20%, transparent); box-shadow: 0 0 18px -4px var(--c); }
+  .nav-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+  button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+  .body-open { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .3s ease; }
+  .body-closed { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+  .body-inner { overflow: hidden; min-height: 0; }
+  .spine-fill { background: linear-gradient(180deg, var(--cyan), var(--violet) 50%, var(--matrix)); box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 70%, transparent); }
+  .caret { transition: transform .25s ease; }
+  .caret.open { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .node, .chip, .body-open, .body-closed, .caret { transition: none; }
+    .card:hover, .card.is-active { transform: none; }
+  }
+</style>
+
+<div id="root"></div>
+
+<script>
+(function () {
+  var h = React.createElement;
+  var useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
+
+  /* Icon set: simple stroked glyphs in the Lucide style, inlined so the page has no icon dependency. */
+  var ICONS = {
+    server: [['rect', { x: 2, y: 2, width: 20, height: 8, rx: 2 }], ['rect', { x: 2, y: 14, width: 20, height: 8, rx: 2 }], ['line', { x1: 6, y1: 6, x2: 6.01, y2: 6 }], ['line', { x1: 6, y1: 18, x2: 6.01, y2: 18 }]],
+    link: [['path', { d: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71' }], ['path', { d: 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' }]],
+    globe: [['circle', { cx: 12, cy: 12, r: 10 }], ['path', { d: 'M2 12h20' }], ['path', { d: 'M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z' }]],
+    shield: [['path', { d: 'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z' }]],
+    trend: [['polyline', { points: '22 7 13.5 15.5 8.5 10.5 2 17' }], ['polyline', { points: '16 7 22 7 22 13' }]],
+    chevron: [['polyline', { points: '6 9 12 15 18 9' }]]
+  };
+  function Icon(props) {
+    var size = props.size || 22;
+    return h('svg', {
+      width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', className: props.className
+    }, ICONS[props.name].map(function (n, i) { return h(n[0], Object.assign({ key: i }, n[1])); }));
+  }
+
+  var PHASES = [
+    {
+      id: 'fase-1', no: 1, color: 'var(--cyan)', icon: 'server',
+      title: 'Fondasi CS & Infrastruktur Web2',
+      groups: [
+        { label: 'Sistem & Jaringan', text: 'Penguasaan Linux CLI, manajemen memori Sistem Operasi (pondasi esensial sebelum memahami EVM), dan arsitektur TCP/IP.', tags: ['Linux CLI', 'Memori OS', 'TCP/IP'] },
+        { label: 'Basis Data', text: 'Desain skema Relational Database (MySQL), DDL/DML, dan arsitektur backend.', tags: ['MySQL', 'DDL/DML', 'Backend'] },
+        { label: 'Web2 Frontend/Backend', text: 'JavaScript ES6+, TypeScript, React.js, dan Node.js/Express.', tags: ['JavaScript ES6+', 'TypeScript', 'React.js', 'Node.js', 'Express'] }
+      ]
+    },
+    {
+      id: 'fase-2', no: 2, color: 'var(--violet)', icon: 'link',
+      title: 'Arsitektur Blockchain & Smart Contract',
+      groups: [
+        { label: 'Konsep Inti', text: 'Distributed Ledger Technology, EVM Architecture, dan Konsensus.', tags: ['DLT', 'EVM', 'Konsensus'] },
+        { label: 'Pengembangan Kontrak', text: 'Pemrograman Solidity.', tags: ['Solidity'] },
+        { label: 'Framework & Tools', text: 'Foundry (fokus utama untuk kompilasi dan testing) dan Hardhat. Secure SSH via terminal client untuk manajemen server jarak jauh.', tags: ['Foundry', 'Hardhat', 'Secure SSH'] },
+        { label: 'Standar Token', text: 'OpenZeppelin (ERC-20, ERC-721, ERC-1155).', tags: ['OpenZeppelin', 'ERC-20', 'ERC-721', 'ERC-1155'] }
+      ]
+    },
+    {
+      id: 'fase-3', no: 3, color: 'var(--matrix)', icon: 'globe',
+      title: 'Integrasi Full-Stack dApp (Decentralized Application)',
+      groups: [
+        { label: 'Konektivitas', text: 'Ethers.js, Viem, Wagmi.', tags: ['Ethers.js', 'Viem', 'Wagmi'] },
+        { label: 'Wallet Management', text: 'RainbowKit, integrasi MetaMask.', tags: ['RainbowKit', 'MetaMask'] },
+        { label: 'Ekosistem Off-chain', text: 'Indexing dengan The Graph (Subgraphs), Oracles dengan Chainlink.', tags: ['The Graph', 'Subgraphs', 'Chainlink Oracles'] },
+        { label: 'Penyimpanan Terdesentralisasi', text: 'IPFS, Pinata.', tags: ['IPFS', 'Pinata'] }
+      ]
+    },
+    {
+      id: 'fase-4', no: 4, color: 'var(--magenta)', icon: 'shield',
+      title: 'Keamanan, Optimasi & Spesialisasi',
+      groups: [
+        { label: 'Gas Optimization', text: 'Manajemen alokasi EVM (storage, memory, calldata).', tags: ['storage', 'memory', 'calldata'] },
+        { label: 'Security Auditing', text: 'Analisis kerentanan (Reentrancy, Front-running) menggunakan tools analisis statis (Slither, Mythril).', tags: ['Reentrancy', 'Front-running', 'Slither', 'Mythril'] },
+        { label: 'Skalabilitas', text: 'Arsitektur Layer-2 (Arbitrum, ZK-Rollups) dan Cross-chain (CCIP).', tags: ['Layer-2', 'Arbitrum', 'ZK-Rollups', 'CCIP'] }
+      ]
+    },
+    {
+      id: 'fase-5', no: 5, color: 'var(--mint)', icon: 'trend',
+      title: 'Taktik Karir Internasional',
+      groups: [
+        { label: 'Portofolio', text: 'Membangun dApp Open Source di ekosistem GitHub.', tags: ['dApp', 'Open Source', 'GitHub'] },
+        { label: 'Kompetisi', text: 'Hackathon global (ETHGlobal) dan kompetisi CTF Keamanan Smart Contract.', tags: ['ETHGlobal', 'CTF Smart Contract'] },
+        { label: 'Eksekusi Karir', text: 'Target posisi Remote Global (Smart Contract Engineer, Web3 Security Auditor).', tags: ['Smart Contract Engineer', 'Web3 Security Auditor', 'Remote Global'] },
+        { label: 'Platform Bounty', text: 'Immunefi, Code4rena, Cantina.', tags: ['Immunefi', 'Code4rena', 'Cantina'] }
+      ]
+    }
+  ];
+
+
+  /* Materi belajar per bagian. Kunci = "nomor fase.indeks bagian". Tipe: J jurnal, B buku, D dokumentasi, V video, K kursus, L latihan. */
+  var TYPES = { J: 'Jurnal', B: 'Buku', D: 'Docs', V: 'Video', K: 'Kursus', L: 'Latihan' };
+  function YT(q) { return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q); }
+  function GS(q) { return 'https://scholar.google.com/scholar?q=' + encodeURIComponent(q); }
+  var RES = {
+    '1.0': [
+      ['B', 'Operating Systems: Three Easy Pieces (Arpaci-Dusseau), gratis', 'https://pages.cs.wisc.edu/~remzi/OSTEP/'],
+      ['B', 'The Linux Command Line (William Shotts), gratis', 'https://linuxcommand.org/tlcl.php'],
+      ['L', 'OverTheWire Bandit: latihan Linux CLI dan SSH', 'https://overthewire.org/wargames/bandit/'],
+      ['K', 'Kurose & Ross, Computer Networking: A Top-Down Approach (materi kuliah)', 'https://gaia.cs.umass.edu/kurose_ross/index.php'],
+      ['J', 'Cerf & Kahn (1974), A Protocol for Packet Network Intercommunication (asal TCP/IP)', GS('Cerf Kahn A Protocol for Packet Network Intercommunication')],
+      ['V', 'Video: Linux command line, OS memory management, dan TCP/IP', YT('Linux command line full course OS memory management TCP/IP')]
+    ],
+    '1.1': [
+      ['J', 'Codd (1970), A Relational Model of Data for Large Shared Data Banks, CACM', 'https://dl.acm.org/doi/10.1145/362384.362685'],
+      ['D', 'MySQL Reference Manual (DDL, DML, indeks, transaksi)', 'https://dev.mysql.com/doc/refman/8.0/en/'],
+      ['K', 'CMU 15-445 Database Systems (Andy Pavlo), kuliah dan video', 'https://15445.courses.cs.cmu.edu/'],
+      ['L', 'SQLBolt: latihan SQL interaktif', 'https://sqlbolt.com'],
+      ['B', 'Use The Index, Luke: indeks dan performa SQL', 'https://use-the-index-luke.com'],
+      ['V', 'Video: MySQL full course dan desain skema database', YT('MySQL full course database design schema')]
+    ],
+    '1.2': [
+      ['D', 'javascript.info: JavaScript modern (ES6+)', 'https://javascript.info'],
+      ['D', 'TypeScript Handbook (resmi)', 'https://www.typescriptlang.org/docs/handbook/intro.html'],
+      ['D', 'React: Learn (resmi)', 'https://react.dev/learn'],
+      ['D', 'Node.js Learn dan Express guide (resmi)', 'https://nodejs.org/en/learn'],
+      ['J', 'Fielding (2000), Architectural Styles and the Design of Network-based Software Architectures (REST)', 'https://ics.uci.edu/~fielding/pubs/dissertation/top.htm'],
+      ['K', 'The Odin Project: jalur full-stack JavaScript', 'https://www.theodinproject.com'],
+      ['V', 'Video: React, TypeScript, Node.js Express full course', YT('React TypeScript Node.js Express full course')]
+    ],
+    '2.0': [
+      ['J', 'Nakamoto (2008), Bitcoin: A Peer-to-Peer Electronic Cash System', 'https://bitcoin.org/bitcoin.pdf'],
+      ['J', 'Wood, Ethereum Yellow Paper (spesifikasi formal EVM)', 'https://ethereum.github.io/yellowpaper/paper.pdf'],
+      ['J', 'Lamport, Shostak & Pease (1982), The Byzantine Generals Problem', 'https://lamport.azurewebsites.net/pubs/byz.pdf'],
+      ['J', 'Castro & Liskov (1999), Practical Byzantine Fault Tolerance, OSDI', 'https://pmg.csail.mit.edu/papers/osdi99.pdf'],
+      ['J', 'Buterin & Griffith, Casper the Friendly Finality Gadget', 'https://arxiv.org/abs/1710.09437'],
+      ['D', 'Ethereum Whitepaper dan dokumentasi EVM (ethereum.org)', 'https://ethereum.org/en/developers/docs/evm/'],
+      ['B', 'Mastering Ethereum (Antonopoulos & Wood), gratis di GitHub', 'https://github.com/ethereumbook/ethereumbook'],
+      ['L', 'evm.codes: referensi opcode dan playground EVM', 'https://www.evm.codes']
+    ],
+    '2.1': [
+      ['D', 'Solidity Documentation (resmi)', 'https://docs.soliditylang.org'],
+      ['D', 'Solidity by Example', 'https://solidity-by-example.org'],
+      ['K', 'Cyfrin Updraft: Solidity dan Smart Contract Development, gratis', 'https://updraft.cyfrin.io'],
+      ['L', 'CryptoZombies: belajar Solidity lewat game', 'https://cryptozombies.io'],
+      ['J', 'Atzei, Bartoletti & Cimoli (2017), A Survey of Attacks on Ethereum Smart Contracts, POST', 'https://eprint.iacr.org/2016/1007'],
+      ['V', 'Video: freeCodeCamp Solidity, Blockchain & Smart Contract Course (Patrick Collins)', YT('freeCodeCamp Solidity Blockchain Smart Contract Course Patrick Collins')]
+    ],
+    '2.2': [
+      ['D', 'The Foundry Book (forge, cast, anvil)', 'https://book.getfoundry.sh'],
+      ['K', 'Cyfrin Updraft: Foundry Fundamentals', 'https://updraft.cyfrin.io/courses/foundry'],
+      ['D', 'Hardhat Documentation', 'https://hardhat.org/docs'],
+      ['D', 'OpenSSH Manual Pages (kunci SSH, ssh-agent, konfigurasi)', 'https://www.openssh.com/manual.html'],
+      ['L', 'OverTheWire Bandit: praktik SSH dari terminal', 'https://overthewire.org/wargames/bandit/'],
+      ['V', 'Video: Foundry tutorial dan testing smart contract', YT('Foundry forge test tutorial smart contract')]
+    ],
+    '2.3': [
+      ['D', 'OpenZeppelin Contracts Documentation', 'https://docs.openzeppelin.com/contracts'],
+      ['D', 'OpenZeppelin Contracts Wizard (generator kontrak)', 'https://wizard.openzeppelin.com'],
+      ['D', 'EIP-20: Token Standard (ERC-20)', 'https://eips.ethereum.org/EIPS/eip-20'],
+      ['D', 'EIP-721: Non-Fungible Token Standard', 'https://eips.ethereum.org/EIPS/eip-721'],
+      ['D', 'EIP-1155: Multi Token Standard', 'https://eips.ethereum.org/EIPS/eip-1155'],
+      ['V', 'Video: ERC-20, ERC-721, ERC-1155 dengan OpenZeppelin', YT('ERC20 ERC721 ERC1155 OpenZeppelin tutorial')]
+    ],
+    '3.0': [
+      ['D', 'viem Documentation', 'https://viem.sh'],
+      ['D', 'Wagmi Documentation (React hooks untuk Ethereum)', 'https://wagmi.sh'],
+      ['D', 'Ethers.js v6 Documentation', 'https://docs.ethers.org/v6/'],
+      ['D', 'Ethereum JSON-RPC API (ethereum.org)', 'https://ethereum.org/en/developers/docs/apis/json-rpc/'],
+      ['V', 'Video: dApp frontend dengan Wagmi, viem, dan Ethers.js', YT('Wagmi viem Ethers.js dApp frontend tutorial')]
+    ],
+    '3.1': [
+      ['D', 'RainbowKit Documentation', 'https://www.rainbowkit.com/docs/introduction'],
+      ['D', 'MetaMask Developer Documentation', 'https://docs.metamask.io'],
+      ['D', 'EIP-1193: Ethereum Provider JavaScript API', 'https://eips.ethereum.org/EIPS/eip-1193'],
+      ['D', 'EIP-4361: Sign-In with Ethereum (SIWE)', 'https://eips.ethereum.org/EIPS/eip-4361'],
+      ['V', 'Video: RainbowKit dan koneksi wallet MetaMask', YT('RainbowKit wagmi connect wallet MetaMask tutorial')]
+    ],
+    '3.2': [
+      ['D', 'The Graph Documentation (Subgraph, GraphQL)', 'https://thegraph.com/docs/'],
+      ['D', 'Chainlink Documentation (Data Feeds, VRF, Automation)', 'https://docs.chain.link'],
+      ['J', 'Breidenbach et al., Chainlink 2.0: Next Steps in the Evolution of Decentralized Oracle Networks', 'https://research.chain.link/whitepaper-v2.pdf'],
+      ['J', 'Zhang et al. (2016), Town Crier: An Authenticated Data Feed for Smart Contracts, CCS', GS('Town Crier An Authenticated Data Feed for Smart Contracts')],
+      ['V', 'Video: The Graph subgraph dan Chainlink price feed', YT('The Graph subgraph tutorial Chainlink price feed tutorial')]
+    ],
+    '3.3': [
+      ['D', 'IPFS Documentation (resmi)', 'https://docs.ipfs.tech'],
+      ['D', 'Pinata Documentation', 'https://docs.pinata.cloud'],
+      ['J', 'Benet (2014), IPFS: Content Addressed, Versioned, P2P File System', 'https://arxiv.org/abs/1407.3561'],
+      ['D', 'OpenSea Metadata Standards (format metadata NFT)', 'https://docs.opensea.io/docs/metadata-standards'],
+      ['V', 'Video: upload NFT metadata ke IPFS dengan Pinata', YT('IPFS Pinata NFT metadata upload tutorial')]
+    ],
+    '4.0': [
+      ['J', 'Chen et al. (2017), Under-Optimized Smart Contracts Devour Your Money', 'https://arxiv.org/abs/1703.03994'],
+      ['D', 'Solidity: Layout of State Variables in Storage', 'https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html'],
+      ['D', 'Foundry: Gas Reports dan Gas Snapshots', 'https://book.getfoundry.sh/forge/gas-reports'],
+      ['B', 'RareSkills: Gas Optimization in Solidity', 'https://www.rareskills.io/post/gas-optimization'],
+      ['L', 'evm.codes: bandingkan biaya gas opcode SLOAD, MLOAD, CALLDATALOAD', 'https://www.evm.codes'],
+      ['V', 'Video: Solidity gas optimization (storage, memory, calldata)', YT('Solidity gas optimization storage memory calldata')]
+    ],
+    '4.1': [
+      ['J', 'Luu et al. (2016), Making Smart Contracts Smarter, CCS', 'https://eprint.iacr.org/2016/633'],
+      ['J', 'Daian et al. (2020), Flash Boys 2.0: Frontrunning in Decentralized Exchanges, S&P', 'https://arxiv.org/abs/1904.05234'],
+      ['J', 'Eskandari et al., SoK: Transparent Dishonesty: Front-Running Attacks on Blockchain', 'https://arxiv.org/abs/1902.05164'],
+      ['J', 'Feist, Grieco & Groce (2019), Slither: A Static Analysis Framework for Smart Contracts', 'https://arxiv.org/abs/1908.09878'],
+      ['D', 'Slither (Trail of Bits) dan Mythril (ConsenSys) di GitHub', 'https://github.com/crytic /slither'],
+      ['D', 'SWC Registry: katalog kelemahan smart contract', 'https://swcregistry.io'],
+      ['L', 'Ethernaut (OpenZeppelin) dan Damn Vulnerable DeFi', 'https://ethernaut.openzeppelin.com'],
+      ['K', 'Cyfrin Updraft: Smart Contract Security dan Auditing', 'https://updraft.cyfrin.io/courses/security']
+    ],
+    '4.2': [
+      ['D', 'Arbitrum Documentation', 'https://docs.arbitrum.io'],
+      ['D', 'Chainlink CCIP Documentation (cross-chain)', 'https://docs.chain.link/ccip'],
+      ['D', 'L2BEAT: data dan risiko seluruh Layer-2', 'https://l2beat.com'],
+      ['J', 'Kalodner et al. (2018), Arbitrum: Scalable, Private Smart Contracts, USENIX Security', 'https://www.usenix.org/conference/usenixsecurity18/presentation/kalodner'],
+      ['J', 'Ben-Sasson et al. (2018), Scalable, Transparent, and Post-Quantum Secure Computational Integrity (STARK)', 'https://eprint.iacr.org/2018/046'],
+      ['J', 'Zamyatin et al. (2019), SoK: Communication Across Distributed Ledgers', 'https://eprint.iacr.org/2019/1128'],
+      ['B', 'Vitalik Buterin, An Incomplete Guide to Rollups', 'https://vitalik.eth.limo/general/2021/01/05/rollup.html'],
+      ['K', 'ZK Learning: materi zero-knowledge proofs', 'https://zk-learning.org']
+    ],
+    '5.0': [
+      ['D', 'Open Source Guides (GitHub)', 'https://opensource.guide'],
+      ['K', 'GitHub Skills: kursus interaktif Git dan kolaborasi', 'https://skills.github.com'],
+      ['D', 'Ethereum.org: Developer Docs sebagai acuan arsitektur dApp', 'https://ethereum.org/en/developers/docs/'],
+      ['V', 'Video: membangun portofolio dApp full-stack dan README GitHub', YT('build web3 dApp portfolio project GitHub full stack')]
+    ],
+    '5.1': [
+      ['D', 'ETHGlobal: jadwal hackathon dan showcase proyek', 'https://ethglobal.com'],
+      ['L', 'Paradigm CTF: kompetisi keamanan smart contract', 'https://ctf.paradigm.xyz'],
+      ['L', 'Damn Vulnerable DeFi (latihan CTF DeFi)', 'https://www.damnvulnerabledefi.xyz'],
+      ['L', 'DeFiHackLabs: reproduksi eksploit nyata dengan Foundry', 'https://github.com/SunWeb3Sec/DeFiHackLabs'],
+      ['V', 'Video: strategi menang hackathon ETHGlobal', YT('ETHGlobal hackathon how to win tips')]
+    ],
+    '5.2': [
+      ['D', 'Web3 Career: lowongan Web3 global', 'https://web3.career'],
+      ['D', 'CryptocurrencyJobs: lowongan remote crypto dan Web3', 'https://cryptocurrencyjobs.co'],
+      ['J', 'Durieux et al. (2020), Empirical Review of Automated Analysis Tools on 47,587 Ethereum Smart Contracts, ICSE', 'https://arxiv.org/abs/1910.10601'],
+      ['J', 'Chaliasos et al. (2024), Smart Contract and DeFi Security Tools: Do They Meet the Needs of Practitioners?, ICSE', 'https://arxiv.org/abs/2304.02981'],
+      ['V', 'Video: karir Smart Contract Engineer dan Web3 Security Auditor', YT('smart contract auditor career roadmap web3 security researcher')]
+    ],
+    '5.3': [
+      ['D', 'Immunefi: bug bounty Web3', 'https://immunefi.com'],
+      ['D', 'Code4rena: kompetisi audit terbuka', 'https://code4rena.com'],
+      ['D', 'Cantina: audit competition dan bounty', 'https://cantina.xyz'],
+      ['D', 'Sherlock: audit contest', 'https://www.sherlock.xyz'],
+      ['D', 'Solodit (Cyfrin): database temuan audit untuk dipelajari', 'https://solodit.cyfrin.io'],
+      ['V', 'Video: cara mulai Code4rena dan Immunefi bug bounty', YT('how to start Code4rena Immunefi bug bounty beginner')]
+    ]
+  };
+  function Refs(props) {
+    var it = props.items || [];
+    if (!it.length) return null;
+    return h('details', { open: true, className: 'mt-4' },
+      h('summary', { className: 'group-label cursor-pointer' }, 'Materi Belajar (' + it.length + ')'),
+      h('ul', { className: 'mt-3 flex flex-col gap-2 list-none p-0 m-0' },
+        it.map(function (r, i) {
+          return h('li', { key: i, className: 'flex items-start gap-2 text-[14px]' },
+            h('span', { className: 'chip shrink-0', style: { minWidth: '64px', textAlign: 'center' } }, TYPES[r[0]]),
+            h('a', { href: r[2], target: '_blank', rel: 'noopener noreferrer', style: { color: 'var(--fg)', textDecoration: 'underline', textDecorationColor: 'color-mix(in srgb, var(--c) 55%, transparent)', textUnderlineOffset: '3px', overflowWrap: 'anywhere' } }, r[1]));
+        })));
+  }
+
+  var TITLE = 'Road Map Prof.Dr. Jery Putra Jaya S.Kom.,M.kom.,ASEAN Eng.';
+
+  /* Falling code canvas for the hero */
+  function CodeRain() {
+    var ref = useRef(null);
+    useEffect(function () {
+      var cv = ref.current; if (!cv) return;
+      var ctx = cv.getContext('2d');
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var glyphs = '01{}();=>0x7f3aEVMETHsolpragma'.split('');
+      var size = 15, cols, drops, raf, w, h2;
+      function resize() {
+        var r = cv.parentElement.getBoundingClientRect();
+        w = cv.width = r.width; h2 = cv.height = r.height;
+        cols = Math.ceil(w / size);
+        drops = []; for (var i = 0; i < cols; i++) drops[i] = Math.random() * (h2 / size);
+      }
+      function frame() {
+        ctx.fillStyle = 'rgba(5,7,13,0.14)'; ctx.fillRect(0, 0, w, h2);
+        ctx.font = size + 'px "IBM Plex Mono", monospace';
+        for (var i = 0; i < cols; i++) {
+          var g = glyphs[Math.floor(Math.random() * glyphs.length)];
+          ctx.fillStyle = (i % 7 === 0) ? 'rgba(167,139,250,0.9)' : 'rgba(74,222,128,0.85)';
+          ctx.fillText(g, i * size, drops[i] * size);
+          if (drops[i] * size > h2 && Math.random() > 0.975) drops[i] = 0;
+          drops[i] += 0.5;
+        }
+        raf = requestAnimationFrame(frame);
+      }
+      resize();
+      ctx.fillStyle = '#05070d'; ctx.fillRect(0, 0, w, h2);
+      if (reduce) { for (var k = 0; k < 90; k++) frame(), cancelAnimationFrame(raf); }
+      else raf = requestAnimationFrame(frame);
+      window.addEventListener('resize', resize);
+      return function () { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+    }, []);
+    return h('canvas', { ref: ref, className: 'absolute inset-0 w-full h-full', style: { opacity: 0.22 }, 'aria-hidden': 'true' });
+  }
+
+  function scrollToPhase(id) {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function Hero() {
+    return h('header', { className: 'relative overflow-hidden border-b', style: { borderColor: 'var(--line)' } },
+      h(CodeRain),
+      h('div', { className: 'absolute inset-0', style: { background: 'radial-gradient(ellipse at 30% 40%, rgba(5,7,13,0.15), var(--bg) 78%), linear-gradient(180deg, transparent 60%, var(--bg))' } }),
+      h('div', { className: 'relative gutter mx-auto max-w-5xl', style: { paddingBlock: '72px 64px' } },
+        h('p', { className: 'font-mono text-xs sm:text-sm tracking-widest uppercase mb-6 flex flex-wrap items-center gap-x-3 gap-y-1', style: { color: 'var(--matrix)' } },
+          h('span', null, '> roadmap.init()'),
+          h('span', { style: { color: 'var(--muted)' } }, 'Cybersecurity · Web3 · Akademis')),
+        h('h1', { className: 'hero-title text-4xl sm:text-5xl lg:text-6xl', style: { overflowWrap: 'anywhere' } }, TITLE),
+        h('p', { className: 'mt-6 max-w-2xl text-base sm:text-lg', style: { color: 'var(--muted)' } },
+          'Peta jalan lima fase dari fondasi ilmu komputer dan infrastruktur Web2 sampai karir global sebagai Smart Contract Engineer dan Web3 Security Auditor.'),
+        h('nav', { 'aria-label': 'Lompat ke fase', className: 'mt-10 flex flex-wrap gap-2' },
+          PHASES.map(function (p) {
+            return h('button', { key: p.id, type: 'button', className: 'nav-chip', style: { '--c': p.color }, onClick: function () { scrollToPhase(p.id); } },
+              h('i'), 'Fase ' + p.no);
+          }))));
+  }
+
+  function Card(props) {
+    var p = props.phase, open = props.open, active = props.active;
+    return h('article', { id: p.id, className: 'card ' + (active ? 'is-active' : ''), style: { '--c': p.color } },
+      h('button', {
+        type: 'button', 'aria-expanded': open, 'aria-controls': p.id + '-body',
+        onClick: props.onToggle,
+        className: 'w-full text-left flex items-start gap-3 p-4 sm:p-5 cursor-pointer'
+      },
+        h('div', { className: 'min-w-0 flex-1' },
+          h('div', { className: 'font-mono text-xs tracking-widest uppercase mb-1', style: { color: p.color } }, 'Fase ' + p.no),
+          h('h2', { className: 'font-display text-xl sm:text-2xl font-semibold leading-snug', style: { textWrap: 'balance' } }, p.title)),
+        h(Icon, { name: 'chevron', size: 20, className: 'caret shrink-0 mt-2 ' + (open ? 'open' : '') })),
+      h('div', { id: p.id + '-body', className: open ? 'body-open' : 'body-closed' },
+        h('div', { className: 'body-inner' },
+          h('div', { className: 'px-4 sm:px-5 pb-5 flex flex-col gap-5' },
+            p.groups.map(function (g, gi) {
+              return h('section', { key: g.label, className: 'border-t pt-4', style: { borderColor: 'color-mix(in srgb, var(--c) 18%, var(--line))' } },
+                h('h3', { className: 'group-label mb-1' }, g.label),
+                h('p', { className: 'text-[15px] mb-3', style: { color: 'var(--fg)' } }, g.text),
+                h('div', { className: 'flex flex-wrap gap-2' },
+                  g.tags.map(function (t) { return h('span', { key: t, className: 'chip' }, t); })), h(Refs, { items: RES[p.no + '.' + gi] }));
+            })))));
+  }
+
+  function Timeline() {
+    var wrapRef = useRef(null);
+    var s1 = useState(function () { var o = {}; PHASES.forEach(function (p) { o[p.id] = true; }); return o; });
+    var open = s1[0], setOpen = s1[1];
+    var s2 = useState(PHASES[0].id), active = s2[0], setActive = s2[1];
+    var s3 = useState(0), progress = s3[0], setProgress = s3[1];
+
+    useEffect(function () {
+      function onScroll() {
+        var el = wrapRef.current; if (!el) return;
+        var r = el.getBoundingClientRect();
+        var mid = window.innerHeight * 0.5;
+        var f = (mid - r.top) / r.height;
+        setProgress(Math.max(0, Math.min(1, f)));
+        var best = PHASES[0].id, bestD = Infinity;
+        PHASES.forEach(function (p) {
+          var n = document.getElementById('node-' + p.id); if (!n) return;
+          var b = n.getBoundingClientRect();
+          var d = Math.abs(b.top + b.height / 2 - mid);
+          if (d < bestD) { bestD = d; best = p.id; }
+        });
+        setActive(best);
+      }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      return function () { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+    }, []);
+
+    function toggle(id) { setOpen(function (o) { var n = Object.assign({}, o); n[id] = !n[id]; return n; }); }
+
+    return h('main', { className: 'gutter mx-auto max-w-5xl', style: { paddingBlock: '64px 24px' } },
+      h('div', { ref: wrapRef, className: 'relative' },
+        h('div', { className: 'absolute top-0 bottom-0 left-6 md:left-1/2 w-px -translate-x-1/2', style: { background: 'var(--line)' }, 'aria-hidden': 'true' },
+          h('div', { className: 'spine-fill w-px', style: { height: (progress * 100) + '%' } })),
+        h('div', { className: 'flex flex-col gap-8 md:gap-12' },
+          PHASES.map(function (p, i) {
+            var left = i % 2 === 0;
+            var isActive = active === p.id;
+            return h('div', { key: p.id, className: 'relative grid grid-cols-[48px_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)] gap-x-4 md:gap-x-6 items-start' },
+              h('div', { id: 'node-' + p.id, className: 'col-start-1 row-start-1 md:col-start-2 justify-self-center z-10' },
+                h('div', { className: 'node ' + (isActive ? 'is-active' : ''), style: { '--c': p.color } }, h(Icon, { name: p.icon }))),
+              h('div', { className: 'col-start-2 row-start-1 min-w-0 ' + (left ? 'md:col-start-1' : 'md:col-start-3') },
+                h(Card, { phase: p, open: !!open[p.id], active: isActive, onToggle: function () { toggle(p.id); } })));
+          }))));
+  }
+
+  function Footer() {
+    return h('footer', { className: 'gutter mx-auto max-w-5xl', style: { paddingBlock: '40px 72px' } },
+      h('div', { className: 'border-t pt-6 font-mono text-xs flex flex-wrap gap-x-4 gap-y-2 justify-between', style: { borderColor: 'var(--line)', color: 'var(--muted)' } },
+        h('span', { style: { overflowWrap: 'anywhere' } }, TITLE),
+        h('span', { style: { color: 'var(--matrix)' } }, '5 fase · 18 bagian · materi belajar lengkap')));
+  }
+
+  function App() { return h(React.Fragment, null, h(Hero), h(Timeline), h(Footer)); }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+})();
+</script>
+
+</body></html>
